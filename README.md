@@ -42,48 +42,51 @@ Console UI → Service → Repository / JDBC → PostgreSQL
 
 ## Структура проекта
 
+```
 flower-shop/
 ├── pom.xml
 ├── README.md
-└── src/main/
-├── java/flowershop/
-│ ├── Main.java
-│ ├── model/
-│ │ ├── Customer.java
-│ │ ├── Bouquet.java
-│ │ ├── BouquetOrder.java
-│ │ └── OrderStatus.java
-│ ├── repository/
-│ │ ├── Repository.java
-│ │ ├── CustomerRepository.java
-│ │ ├── CustomerRepositoryJdbc.java
-│ │ ├── BouquetRepository.java
-│ │ ├── BouquetRepositoryJdbc.java
-│ │ ├── OrderRepository.java
-│ │ └── OrderRepositoryJdbc.java
-│ ├── service/
-│ │ ├── CustomerService.java
-│ │ ├── BouquetService.java
-│ │ └── OrderService.java
-│ ├── exception/
-│ │ ├── BusinessException.java
-│ │ ├── EntityNotFoundException.java
-│ │ ├── ValidationException.java
-│ │ └── DatabaseConnectionException.java
-│ ├── ui/
-│ │ ├── ConsoleMenu.java
-│ │ ├── CustomerMenu.java
-│ │ ├── BouquetMenu.java
-│ │ ├── OrderMenu.java
-│ │ └── InputHelper.java
-│ └── util/
-│ ├── DatabaseManager.java
-│ └── ExcelExporter.java
-└── resources/
-├── config.properties
-├── schema.sql
-└── seed.sql
-
+└── src/
+    └── main/
+        ├── java/
+        │   └── flowershop/
+        │       ├── Main.java
+        │       ├── model/
+        │       │   ├── Customer.java
+        │       │   ├── Bouquet.java
+        │       │   ├── BouquetOrder.java
+        │       │   └── OrderStatus.java
+        │       ├── repository/
+        │       │   ├── Repository.java
+        │       │   ├── CustomerRepository.java
+        │       │   ├── CustomerRepositoryJdbc.java
+        │       │   ├── BouquetRepository.java
+        │       │   ├── BouquetRepositoryJdbc.java
+        │       │   ├── OrderRepository.java
+        │       │   └── OrderRepositoryJdbc.java
+        │       ├── service/
+        │       │   ├── CustomerService.java
+        │       │   ├── BouquetService.java
+        │       │   └── OrderService.java
+        │       ├── exception/
+        │       │   ├── BusinessException.java
+        │       │   ├── EntityNotFoundException.java
+        │       │   ├── ValidationException.java
+        │       │   └── DatabaseConnectionException.java
+        │       ├── ui/
+        │       │   ├── ConsoleMenu.java
+        │       │   ├── CustomerMenu.java
+        │       │   ├── BouquetMenu.java
+        │       │   ├── OrderMenu.java
+        │       │   └── InputHelper.java
+        │       └── util/
+        │           ├── DatabaseManager.java
+        │           └── ExcelExporter.java
+        └── resources/
+            ├── config.properties
+            ├── schema.sql
+            └── seed.sql
+```
 
 ## Требования для запуска
 
