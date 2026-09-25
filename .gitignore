@@ -1,0 +1,22 @@
+# Maven
+target/
+
+# Скомпилированные классы
+*.class
+
+# IDE / VS Code
+.vscode/
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Логи
+*.log
+
+# Экспортированные Excel-файлы (генерируются программой)
+flower_shop_export_*.xlsx
+
+# Файл с реальным паролем от БД — если хотите скрыть свои учётные данные
+# config.properties
