@@ -1,4 +1,4 @@
-package src.main.java.flowershop.exception;
+package flowershop.exception;
 
 
 public class ValidationException extends RuntimeException {
