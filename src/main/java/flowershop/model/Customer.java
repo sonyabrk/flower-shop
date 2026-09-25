@@ -1,4 +1,4 @@
-package src.main.java.flowershop.model;
+package flowershop.model;
 
 import java.util.Objects;
 
