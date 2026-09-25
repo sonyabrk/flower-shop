@@ -19,11 +19,11 @@
 
 ### Enum OrderStatus
 
-NEW — заказ создан
-CONFIRMED — подтверждён менеджером
-IN_DELIVERY — передан в доставку
-DELIVERED — доставлен
-CANCELLED — отменён
+- **NEW** — заказ создан
+- **CONFIRMED** — подтверждён менеджером
+- **IN_DELIVERY** — передан в доставку
+- **DELIVERED** — доставлен
+- **CANCELLED** — отменён
 
 
 ## Архитектура
