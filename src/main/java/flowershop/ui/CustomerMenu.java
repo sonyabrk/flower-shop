@@ -18,7 +18,7 @@ public class CustomerMenu {
     public void show() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- КЛИЕНТЫ ---");
+            System.out.println("\n    КЛИЕНТЫ");
             System.out.println("1. Создать клиента");
             System.out.println("2. Список всех клиентов");
             System.out.println("3. Найти клиента по ID");

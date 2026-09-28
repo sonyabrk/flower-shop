@@ -19,7 +19,7 @@ public class BouquetMenu {
     public void show() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- БУКЕТЫ ---");
+            System.out.println("\n   БУКЕТЫ");
             System.out.println("1. Добавить букет");
             System.out.println("2. Список всех букетов");
             System.out.println("3. Найти букет по ID");

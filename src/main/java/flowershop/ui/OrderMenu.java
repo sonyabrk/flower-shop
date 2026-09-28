@@ -31,7 +31,7 @@ public class OrderMenu {
     public void show() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- ЗАКАЗЫ ---");
+            System.out.println("\n     ЗАКАЗЫ");
             System.out.println("1. Создать заказ");
             System.out.println("2. Список всех заказов");
             System.out.println("3. Найти заказ по ID");
@@ -63,7 +63,7 @@ public class OrderMenu {
         }
     }
 
-    // ---------- запросы ID с повтором, пока не введён существующий ----------
+    // запросы ID с повтором, пока не введён существующий 
 
     private long readExistingCustomerId() {
         while (true) {
@@ -120,7 +120,7 @@ public class OrderMenu {
         }
     }
 
-    // ---------- операции ----------
+    // операции 
 
     private void create() {
         long customerId = readExistingCustomerId();
@@ -188,7 +188,7 @@ public class OrderMenu {
     }
 
     public void showSearch() {
-        System.out.println("\n--- ПОИСК ЗАКАЗОВ ---");
+        System.out.println("\n   ПОИСК ЗАКАЗОВ");
         System.out.println("1. По имени клиента");
         System.out.println("2. По названию букета");
         int choice = input.readMenuChoice("Выберите способ поиска: ");
@@ -201,7 +201,7 @@ public class OrderMenu {
     }
 
     public void showFilter() {
-        System.out.println("\n--- ФИЛЬТРАЦИЯ ЗАКАЗОВ ---");
+        System.out.println("\n   ФИЛЬТРАЦИЯ ЗАКАЗОВ");
         System.out.println("1. По статусу");
         System.out.println("2. По диапазону дат");
         int choice = input.readMenuChoice("Выберите фильтр: ");
@@ -223,7 +223,7 @@ public class OrderMenu {
     }
 
     public void showStatistics() {
-        System.out.println("\n--- СТАТИСТИКА ---");
+        System.out.println("\n   СТАТИСТИКА");
         System.out.println("Всего клиентов: " + customerService.getAll().size());
         System.out.println("Всего букетов в каталоге: " + bouquetService.getAll().size());
         System.out.println("Всего заказов: " + orderService.getAll().size());
