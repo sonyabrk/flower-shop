@@ -13,6 +13,7 @@ public class ConsoleMenu {
     private final CustomerMenu customerMenu;
     private final BouquetMenu bouquetMenu;
     private final OrderMenu orderMenu;
+    private final TablePrinter tablePrinter;
 
     public ConsoleMenu(CustomerService customerService,
                         BouquetService bouquetService,
@@ -22,6 +23,7 @@ public class ConsoleMenu {
         this.customerMenu = new CustomerMenu(input, customerService);
         this.bouquetMenu = new BouquetMenu(input, bouquetService);
         this.orderMenu = new OrderMenu(input, orderService, customerService, bouquetService);
+        this.tablePrinter = new TablePrinter(customerService, bouquetService, orderService);
     }
 
     public void start() {
@@ -53,6 +55,7 @@ public class ConsoleMenu {
             case 5 -> orderMenu.showFilter();
             case 6 -> orderMenu.showStatistics();
             case 7 -> orderMenu.exportToExcel();
+            case 8 -> tablePrinter.showAll();
             default -> System.out.println("Неизвестный пункт меню. Выберите число из списка.");
         }
     }
@@ -68,6 +71,7 @@ public class ConsoleMenu {
         System.out.println("5. Фильтрация заказов");
         System.out.println("6. Статистика");
         System.out.println("7. Экспорт данных");
+        System.out.println("8. Вывести таблицы базы данных");
         System.out.println("0. Выход");
     }
 }
