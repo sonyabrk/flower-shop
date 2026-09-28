@@ -1,10 +1,13 @@
 package flowershop.ui;
 
+import flowershop.exception.EntityNotFoundException;
+import flowershop.exception.OperationCancelledException;
 import flowershop.model.BouquetOrder;
 import flowershop.model.OrderStatus;
 import flowershop.service.BouquetService;
 import flowershop.service.CustomerService;
 import flowershop.service.OrderService;
+import flowershop.util.ExcelExporter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +21,7 @@ public class OrderMenu {
     private final BouquetService bouquetService;
 
     public OrderMenu(InputHelper input, OrderService orderService,
-                      CustomerService customerService, BouquetService bouquetService) {
+                     CustomerService customerService, BouquetService bouquetService) {
         this.input = input;
         this.orderService = orderService;
         this.customerService = customerService;
@@ -39,27 +42,92 @@ public class OrderMenu {
             System.out.println("0. Назад");
 
             int choice = input.readMenuChoice("Выберите действие: ");
+            if (choice == 0) {
+                back = true;
+                continue;
+            }
+            ErrorHandler.run(() -> handle(choice));
+        }
+    }
 
-            switch (choice) {
-                case 1 -> create();
-                case 2 -> printAll(orderService.getAll());
-                case 3 -> printOne(orderService.getById(input.readLong("ID заказа: ")));
-                case 4 -> update();
-                case 5 -> changeStatus();
-                case 6 -> delete();
-                case 7 -> sort();
-                case 0 -> back = true;
-                default -> System.out.println("Неизвестный пункт меню.");
+    private void handle(int choice) {
+        switch (choice) {
+            case 1 -> create();
+            case 2 -> printAll(orderService.getAll());
+            case 3 -> System.out.println(orderService.getById(input.readLong("ID заказа: ")));
+            case 4 -> update();
+            case 5 -> changeStatus();
+            case 6 -> delete();
+            case 7 -> sort();
+            default -> System.out.println("Неизвестный пункт меню. Выберите число из списка.");
+        }
+    }
+
+    // ---------- запросы ID с повтором, пока не введён существующий ----------
+
+    private long readExistingCustomerId() {
+        while (true) {
+            long id = input.readLong("ID клиента (0 — отмена): ");
+            if (id == 0) {
+                throw new OperationCancelledException("Операция отменена.");
+            }
+            try {
+                customerService.getById(id);
+                return id;
+            } catch (EntityNotFoundException e) {
+                System.out.println("Ошибка: клиента с ID " + id + " не существует. Введите другой ID.");
             }
         }
     }
 
+    private long readExistingBouquetId(String prompt) {
+        while (true) {
+            long id = input.readLong(prompt + " (0 — отмена): ");
+            if (id == 0) {
+                throw new OperationCancelledException("Операция отменена.");
+            }
+            try {
+                bouquetService.getById(id);
+                return id;
+            } catch (EntityNotFoundException e) {
+                System.out.println("Ошибка: букета с ID " + id + " не существует. Введите другой ID.");
+            }
+        }
+    }
+
+    private long readExistingOrderId(String prompt) {
+        while (true) {
+            long id = input.readLong(prompt + " (0 — отмена): ");
+            if (id == 0) {
+                throw new OperationCancelledException("Операция отменена.");
+            }
+            try {
+                orderService.getById(id);
+                return id;
+            } catch (EntityNotFoundException e) {
+                System.out.println("Ошибка: заказа с ID " + id + " не существует. Введите другой ID.");
+            }
+        }
+    }
+
+    private LocalDate readDeliveryDate(LocalDate orderDate) {
+        while (true) {
+            LocalDate date = input.readDateOptional("Дата доставки");
+            if (date == null || !date.isBefore(orderDate)) {
+                return date;
+            }
+            System.out.println("Ошибка: дата доставки не может быть раньше даты заказа (" + orderDate + ").");
+        }
+    }
+
+    // ---------- операции ----------
+
     private void create() {
-        long customerId = input.readLong("ID клиента: ");
-        long bouquetId = input.readLong("ID букета: ");
-        int quantity = input.readInt("Количество: ");
+        long customerId = readExistingCustomerId();
+        long bouquetId = readExistingBouquetId("ID букета");
+        int quantity = input.readPositiveInt("Количество: ");
         LocalDate orderDate = LocalDate.now();
-        LocalDate deliveryDate = input.readDateOptional("Дата доставки");
+        LocalDate deliveryDate = readDeliveryDate(orderDate);
 
         BouquetOrder order = new BouquetOrder();
         order.setCustomerId(customerId);
@@ -73,35 +141,28 @@ public class OrderMenu {
     }
 
     private void update() {
-        long id = input.readLong("ID заказа для изменения: ");
-        long bouquetId = input.readLong("Новый ID букета: ");
-        int quantity = input.readInt("Новое количество: ");
-        LocalDate deliveryDate = input.readDateOptional("Новая дата доставки");
+        long id = readExistingOrderId("ID заказа для изменения");
+        BouquetOrder existing = orderService.getById(id);
+        long bouquetId = readExistingBouquetId("Новый ID букета");
+        int quantity = input.readPositiveInt("Новое количество: ");
+        LocalDate deliveryDate = readDeliveryDate(existing.getOrderDate());
 
         BouquetOrder updated = new BouquetOrder();
         updated.setBouquetId(bouquetId);
         updated.setQuantity(quantity);
         updated.setDeliveryDate(deliveryDate);
+        updated.setOrderDate(existing.getOrderDate());
 
-        BouquetOrder result = orderService.update(id, updated);
-        System.out.println("Заказ обновлён: " + result);
+        System.out.println("Заказ обновлён: " + orderService.update(id, updated));
     }
 
     private void changeStatus() {
-        long id = input.readLong("ID заказа: ");
-        System.out.println("Доступные статусы: " + java.util.Arrays.toString(OrderStatus.values()));
-        String statusRaw = input.readLine("Новый статус: ").toUpperCase();
+        long id = readExistingOrderId("ID заказа");
+        BouquetOrder current = orderService.getById(id);
+        System.out.println("Текущий статус: " + current.getStatus());
+        OrderStatus status = input.readEnum("Новый статус: ", OrderStatus.class);
 
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(statusRaw);
-        } catch (IllegalArgumentException e) {
-            throw new flowershop.exception.ValidationException(
-                    "Некорректный статус: \"" + statusRaw + "\"");
-        }
-
-        BouquetOrder updated = orderService.changeStatus(id, status);
-        System.out.println("Статус изменён: " + updated);
+        System.out.println("Статус изменён: " + orderService.changeStatus(id, status));
     }
 
     private void delete() {
@@ -114,16 +175,15 @@ public class OrderMenu {
         System.out.println("1. По дате заказа");
         System.out.println("2. По сумме заказа");
         int choice = input.readMenuChoice("Выберите способ сортировки: ");
-        boolean ascending = input.readLine("По возрастанию? (да/нет): ").equalsIgnoreCase("да");
+        if (choice != 1 && choice != 2) {
+            System.out.println("Неизвестный способ сортировки. Выберите 1 или 2.");
+            return;
+        }
+        boolean ascending = input.readYesNo("По возрастанию?");
 
-        List<BouquetOrder> result = switch (choice) {
-            case 1 -> orderService.sortByDate(ascending);
-            case 2 -> orderService.sortByTotalPrice(ascending);
-            default -> {
-                System.out.println("Неизвестный способ сортировки.");
-                yield List.of();
-            }
-        };
+        List<BouquetOrder> result = (choice == 1)
+                ? orderService.sortByDate(ascending)
+                : orderService.sortByTotalPrice(ascending);
         printAll(result);
     }
 
@@ -133,15 +193,11 @@ public class OrderMenu {
         System.out.println("2. По названию букета");
         int choice = input.readMenuChoice("Выберите способ поиска: ");
 
-        List<BouquetOrder> result = switch (choice) {
-            case 1 -> orderService.searchByCustomerName(input.readLine("Имя клиента: "));
-            case 2 -> orderService.searchByBouquetName(input.readLine("Название букета: "));
-            default -> {
-                System.out.println("Неизвестный способ поиска.");
-                yield List.of();
-            }
-        };
-        printAll(result);
+        switch (choice) {
+            case 1 -> printAll(orderService.searchByCustomerName(input.readNonBlank("Имя клиента: ")));
+            case 2 -> printAll(orderService.searchByBouquetName(input.readNonBlank("Название букета: ")));
+            default -> System.out.println("Неизвестный способ поиска. Выберите 1 или 2.");
+        }
     }
 
     public void showFilter() {
@@ -150,23 +206,20 @@ public class OrderMenu {
         System.out.println("2. По диапазону дат");
         int choice = input.readMenuChoice("Выберите фильтр: ");
 
-        List<BouquetOrder> result = switch (choice) {
-            case 1 -> {
-                System.out.println("Доступные статусы: " + java.util.Arrays.toString(OrderStatus.values()));
-                String raw = input.readLine("Статус: ").toUpperCase();
-                yield orderService.filterByStatus(OrderStatus.valueOf(raw));
-            }
+        switch (choice) {
+            case 1 -> printAll(orderService.filterByStatus(
+                    input.readEnum("Статус: ", OrderStatus.class)));
             case 2 -> {
                 LocalDate from = input.readDate("Дата с");
                 LocalDate to = input.readDate("Дата по");
-                yield orderService.filterByDateRange(from, to);
+                while (to.isBefore(from)) {
+                    System.out.println("Ошибка: конечная дата раньше начальной. Введите её ещё раз.");
+                    to = input.readDate("Дата по");
+                }
+                printAll(orderService.filterByDateRange(from, to));
             }
-            default -> {
-                System.out.println("Неизвестный фильтр.");
-                yield List.of();
-            }
-        };
-        printAll(result);
+            default -> System.out.println("Неизвестный фильтр. Выберите 1 или 2.");
+        }
     }
 
     public void showStatistics() {
@@ -176,19 +229,22 @@ public class OrderMenu {
         System.out.println("Всего заказов: " + orderService.getAll().size());
 
         Map<OrderStatus, Long> byStatus = orderService.countByStatus();
-        byStatus.forEach((status, count) ->
-                System.out.println("  " + status + ": " + count));
+        byStatus.forEach((status, count) -> System.out.println("  " + status + ": " + count));
 
         System.out.println("Общая выручка (доставленные заказы): " + orderService.totalRevenue());
     }
 
     public void exportToExcel() {
-        // Реализация появится вместе с ExcelExporter в util/
-        System.out.println("Экспорт в Excel пока не реализован — будет добавлен на следующем шаге.");
-    }
+        String fileName = "flower_shop_export_" + LocalDate.now() + ".xlsx";
 
-    private void printOne(BouquetOrder order) {
-        System.out.println(order);
+        ExcelExporter.export(
+                fileName,
+                customerService.getAll(),
+                bouquetService.getAll(),
+                orderService.getAll()
+        );
+
+        System.out.println("Данные экспортированы в файл: " + fileName);
     }
 
     private void printAll(List<BouquetOrder> orders) {

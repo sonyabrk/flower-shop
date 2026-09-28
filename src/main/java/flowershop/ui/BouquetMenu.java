@@ -19,7 +19,7 @@ public class BouquetMenu {
     public void show() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n БУКЕТЫ ");
+            System.out.println("\n--- БУКЕТЫ ---");
             System.out.println("1. Добавить букет");
             System.out.println("2. Список всех букетов");
             System.out.println("3. Найти букет по ID");
@@ -30,24 +30,30 @@ public class BouquetMenu {
             System.out.println("0. Назад");
 
             int choice = input.readMenuChoice("Выберите действие: ");
-
-            switch (choice) {
-                case 1 -> create();
-                case 2 -> printAll(bouquetService.getAll());
-                case 3 -> printOne(bouquetService.getById(input.readLong("ID букета: ")));
-                case 4 -> update();
-                case 5 -> delete();
-                case 6 -> printAll(bouquetService.search(input.readLine("Название (часть слова): ")));
-                case 7 -> filterByPrice();
-                case 0 -> back = true;
-                default -> System.out.println("Неизвестный пункт меню.");
+            if (choice == 0) {
+                back = true;
+                continue;
             }
+            ErrorHandler.run(() -> handle(choice));
+        }
+    }
+
+    private void handle(int choice) {
+        switch (choice) {
+            case 1 -> create();
+            case 2 -> printAll(bouquetService.getAll());
+            case 3 -> System.out.println(bouquetService.getById(input.readLong("ID букета: ")));
+            case 4 -> update();
+            case 5 -> delete();
+            case 6 -> printAll(bouquetService.search(input.readNonBlank("Название (часть слова): ")));
+            case 7 -> filterByPrice();
+            default -> System.out.println("Неизвестный пункт меню. Выберите число из списка.");
         }
     }
 
     private void create() {
-        String name = input.readLine("Название букета: ");
-        String description = input.readLine("Описание: ");
+        String name = input.readNonBlank("Название букета: ");
+        String description = input.readLine("Описание (можно пропустить): ");
         BigDecimal price = input.readBigDecimal("Цена: ");
 
         Bouquet created = bouquetService.create(new Bouquet(name, description, price));
@@ -56,7 +62,8 @@ public class BouquetMenu {
 
     private void update() {
         long id = input.readLong("ID букета для изменения: ");
-        String name = input.readLine("Новое название: ");
+        bouquetService.getById(id);
+        String name = input.readNonBlank("Новое название: ");
         String description = input.readLine("Новое описание: ");
         BigDecimal price = input.readBigDecimal("Новая цена: ");
 
@@ -74,10 +81,6 @@ public class BouquetMenu {
         BigDecimal min = input.readBigDecimal("Минимальная цена: ");
         BigDecimal max = input.readBigDecimal("Максимальная цена: ");
         printAll(bouquetService.filterByPriceRange(min, max));
-    }
-
-    private void printOne(Bouquet bouquet) {
-        System.out.println(bouquet);
     }
 
     private void printAll(List<Bouquet> bouquets) {

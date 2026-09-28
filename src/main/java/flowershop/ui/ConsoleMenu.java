@@ -1,9 +1,9 @@
 package flowershop.ui;
 
-import flowershop.exception.BusinessException;
-import flowershop.exception.DatabaseConnectionException;
-import flowershop.exception.EntityNotFoundException;
-import flowershop.exception.ValidationException;
+// import flowershop.exception.BusinessException;
+// import flowershop.exception.DatabaseConnectionException;
+// import flowershop.exception.EntityNotFoundException;
+// import flowershop.exception.ValidationException;
 import flowershop.service.BouquetService;
 import flowershop.service.CustomerService;
 import flowershop.service.OrderService;
@@ -33,38 +33,32 @@ public class ConsoleMenu {
 
         while (running) {
             printMenu();
-            try {
-                int choice = input.readMenuChoice("Выберите действие: ");
+            int choice = input.readMenuChoice("Выберите действие: ");
 
-                switch (choice) {
-                    case 1 -> customerMenu.show();
-                    case 2 -> bouquetMenu.show();
-                    case 3 -> orderMenu.show();
-                    case 4 -> orderMenu.showSearch();
-                    case 5 -> orderMenu.showFilter();
-                    case 6 -> orderMenu.showStatistics();
-                    case 7 -> orderMenu.exportToExcel();
-                    case 0 -> {
-                        running = false;
-                        System.out.println("Выход из программы.");
-                    }
-                    default -> System.out.println("Неизвестный пункт меню. Попробуйте снова.\n");
-                }
-
-            } catch (ValidationException e) {
-                System.out.println("Ошибка ввода: " + e.getMessage() + "\n");
-            } catch (BusinessException e) {
-                System.out.println("Нарушено бизнес-правило: " + e.getMessage() + "\n");
-            } catch (EntityNotFoundException e) {
-                System.out.println("Не найдено: " + e.getMessage() + "\n");
-            } catch (DatabaseConnectionException e) {
-                System.out.println("Ошибка базы данных: " + e.getMessage() + "\n");
-            } catch (Exception e) {
-                System.out.println("Непредвиденная ошибка: " + e.getMessage() + "\n");
+            if (choice == 0) {
+                running = false;
+                System.out.println("Выход из программы.");
+                continue;
             }
+
+            ErrorHandler.run(() -> handle(choice));
+            System.out.println();
         }
 
         scanner.close();
+    }
+
+    private void handle(int choice) {
+        switch (choice) {
+            case 1 -> customerMenu.show();
+            case 2 -> bouquetMenu.show();
+            case 3 -> orderMenu.show();
+            case 4 -> orderMenu.showSearch();
+            case 5 -> orderMenu.showFilter();
+            case 6 -> orderMenu.showStatistics();
+            case 7 -> orderMenu.exportToExcel();
+            default -> System.out.println("Неизвестный пункт меню. Выберите число из списка.");
+        }
     }
 
     private void printMenu() {

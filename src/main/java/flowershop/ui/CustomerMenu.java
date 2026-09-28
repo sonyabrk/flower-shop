@@ -28,24 +28,30 @@ public class CustomerMenu {
             System.out.println("0. Назад");
 
             int choice = input.readMenuChoice("Выберите действие: ");
-
-            switch (choice) {
-                case 1 -> create();
-                case 2 -> printAll(customerService.getAll());
-                case 3 -> printOne(customerService.getById(input.readLong("ID клиента: ")));
-                case 4 -> update();
-                case 5 -> delete();
-                case 6 -> printAll(customerService.search(input.readLine("Введите имя или email: ")));
-                case 0 -> back = true;
-                default -> System.out.println("Неизвестный пункт меню.");
+            if (choice == 0) {
+                back = true;
+                continue;
             }
+            ErrorHandler.run(() -> handle(choice));
+        }
+    }
+
+    private void handle(int choice) {
+        switch (choice) {
+            case 1 -> create();
+            case 2 -> printAll(customerService.getAll());
+            case 3 -> System.out.println(customerService.getById(input.readLong("ID клиента: ")));
+            case 4 -> update();
+            case 5 -> delete();
+            case 6 -> printAll(customerService.search(input.readNonBlank("Введите имя или email: ")));
+            default -> System.out.println("Неизвестный пункт меню. Выберите число из списка.");
         }
     }
 
     private void create() {
-        String fullName = input.readLine("Имя клиента: ");
-        String phone = input.readLine("Телефон: ");
-        String email = input.readLine("Email: ");
+        String fullName = input.readNonBlank("Имя клиента: ");
+        String phone = input.readNonBlank("Телефон: ");
+        String email = input.readNonBlank("Email: ");
 
         Customer created = customerService.create(new Customer(fullName, phone, email));
         System.out.println("Клиент создан: " + created);
@@ -53,9 +59,10 @@ public class CustomerMenu {
 
     private void update() {
         long id = input.readLong("ID клиента для изменения: ");
-        String fullName = input.readLine("Новое имя: ");
-        String phone = input.readLine("Новый телефон: ");
-        String email = input.readLine("Новый email: ");
+        customerService.getById(id); // сразу проверяем, что клиент существует
+        String fullName = input.readNonBlank("Новое имя: ");
+        String phone = input.readNonBlank("Новый телефон: ");
+        String email = input.readNonBlank("Новый email: ");
 
         Customer updated = customerService.update(id, new Customer(fullName, phone, email));
         System.out.println("Клиент обновлён: " + updated);
@@ -65,10 +72,6 @@ public class CustomerMenu {
         long id = input.readLong("ID клиента для удаления: ");
         customerService.delete(id);
         System.out.println("Клиент удалён.");
-    }
-
-    private void printOne(Customer customer) {
-        System.out.println(customer);
     }
 
     private void printAll(List<Customer> customers) {
