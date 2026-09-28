@@ -44,6 +44,7 @@ Console UI → Service → Repository / JDBC → PostgreSQL
 
 ```
 flower-shop/
+├── .gitignore
 ├── pom.xml
 ├── README.md
 └── src/
@@ -72,13 +73,15 @@ flower-shop/
         │       │   ├── BusinessException.java
         │       │   ├── EntityNotFoundException.java
         │       │   ├── ValidationException.java
-        │       │   └── DatabaseConnectionException.java
+        │       │   ├── DatabaseConnectionException.java
+        │       │   └── OperationCancelledException.java
         │       ├── ui/
         │       │   ├── ConsoleMenu.java
         │       │   ├── CustomerMenu.java
         │       │   ├── BouquetMenu.java
         │       │   ├── OrderMenu.java
-        │       │   └── InputHelper.java
+        │       │   ├── InputHelper.java
+        │       │   └── ErrorHandler.java
         │       └── util/
         │           ├── DatabaseManager.java
         │           └── ExcelExporter.java
@@ -232,10 +235,11 @@ java -jar target/flower-shop.jar
 - обращении к несуществующей записи (`EntityNotFoundException`);
 - нарушении бизнес-правила (`BusinessException`);
 - ошибках подключения к БД или выполнения SQL-запроса
-  (`DatabaseConnectionException`).
+  (`DatabaseConnectionException`);
+- отмене операции пользователем вводом `0` (`OperationCancelledException`).
 
-Все ошибки перехватываются в `ConsoleMenu` и выводятся пользователю
-понятным сообщением, после чего работа продолжается.
+Все ошибки перехватываются в `ErrorHandler` и выводятся пользователю
+понятным сообщением, после чего работа продолжается в том же меню.
 
 ## Технологии
 
